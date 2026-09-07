@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { guardarNota } from "@/lib/guardar-nota";
 
-type Estado = "vacio" | "guardando" | "guardado";
+type Estado = "vacio" | "guardando" | "guardado" | "error";
 
 export function FormularioNota() {
   const [texto, setTexto] = useState("");
   const [estado, setEstado] = useState<Estado>("vacio");
+  const [motivo, setMotivo] = useState("");
 
   async function alEnviar(evento: React.FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -15,8 +16,10 @@ export function FormularioNota() {
 
     try {
       await guardarNota(texto);
-    } catch {
-      // TODO
+    } catch (error) {
+      setMotivo(error instanceof Error ? error.message : "");
+      setEstado("error");
+      return;
     }
 
     setEstado("guardado");
@@ -52,6 +55,12 @@ export function FormularioNota() {
         {estado === "guardado" && (
           <span role="status" className="text-sm text-emerald-700">
             Guardado
+          </span>
+        )}
+
+        {estado === "error" && (
+          <span role="alert" className="text-sm text-red-700">
+            No se pudo guardar{motivo ? `: ${motivo}` : ""}
           </span>
         )}
       </div>

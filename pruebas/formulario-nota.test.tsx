@@ -14,5 +14,17 @@ describe("FormularioNota", () => {
     expect(await screen.findByText("Guardado")).toBeInTheDocument();
   });
 
-  // Aquí va la prueba que demuestra tu arreglo.
+  it("no dice «Guardado» cuando el servidor rechaza la nota", async () => {
+    const usuario = userEvent.setup();
+    render(<FormularioNota />);
+
+    await usuario.type(screen.getByLabelText("Tu nota"), "Esto falla");
+    await usuario.click(screen.getByRole("button", { name: "Guardar" }));
+
+    const aviso = await screen.findByRole("alert");
+    expect(aviso).toHaveTextContent("No se pudo guardar");
+    expect(aviso).toHaveTextContent("El servidor rechazó la nota");
+
+    expect(screen.queryByText("Guardado")).not.toBeInTheDocument();
+  });
 });
